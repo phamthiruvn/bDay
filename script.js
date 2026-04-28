@@ -116,7 +116,7 @@ document.querySelector(".contact-form")?.addEventListener("submit", (event) => {
   const status = form.querySelector(".form-status");
 
   if (status) {
-    status.textContent = "Message ready. Connect this form to your email or backend.";
+    status.textContent = "Placeholder status message.";
   }
 
   form.reset();
