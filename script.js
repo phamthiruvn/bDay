@@ -121,3 +121,112 @@ document.querySelector(".contact-form")?.addEventListener("submit", (event) => {
 
   form.reset();
 });
+
+// Blink animation for hero heading split_2 spans
+const triggerBlink = () => {
+  if (reducedMotion) return;
+  const spans = Array.from(document.querySelectorAll("h1 .split_2"));
+  if (!spans.length) return;
+
+  // Batch the reflow to a single pass: set delays, then force one reflow, then add class
+  spans.forEach((span, index) => {
+    span.classList.remove("blink");
+    span.style.animationDelay = `${index * 0.18}s`;
+  });
+
+  void document.body.offsetWidth; // single reflow for all
+  spans.forEach((span) => span.classList.add("blink"));
+};
+
+// Trigger blink on page load (respect reduced-motion)
+window.addEventListener("load", () => {
+  if (!reducedMotion) triggerBlink();
+});
+
+// Trigger blink when hero section scrolls into view and fade based on distance
+const heroSection = document.querySelector(".hero");
+if (heroSection) {
+  if (reducedMotion) {
+    // Ensure full visibility when reduced motion is requested
+    document.querySelectorAll("h1 .split_2").forEach((s) => (s.style.opacity = "1"));
+  } else {
+    let rafId = null;
+    const spans = Array.from(document.querySelectorAll("h1 .split_2"));
+    if (!spans.length) {
+      // nothing to animate
+    } else {
+      let currentOpacities = spans.map((s) => {
+        const v = parseFloat(getComputedStyle(s).opacity);
+        return Number.isFinite(v) ? v : 1;
+      });
+      let targetOpacities = currentOpacities.slice();
+      const easing = 0.08; // interpolation per frame
+
+      const computeTargets = (rect) => {
+        const heroCenter = rect.top + rect.height / 2;
+        const viewportCenter = window.innerHeight / 2;
+        const distance = Math.abs(heroCenter - viewportCenter);
+        const maxDistance = window.innerHeight; // tuning value
+        const raw = 1 - distance / maxDistance;
+        const normalized = Math.max(0, Math.min(1, raw));
+        const minOpacity = 0.03; // how invisible at far distance
+        const target = minOpacity + normalized * (1 - minOpacity);
+        for (let i = 0; i < targetOpacities.length; i++) targetOpacities[i] = target;
+
+        // Blink when hero becomes visible
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          if (!heroSection.dataset.blinkTriggered) {
+            triggerBlink();
+            heroSection.dataset.blinkTriggered = "true";
+          }
+        } else {
+          heroSection.dataset.blinkTriggered = "false";
+        }
+      };
+
+      const animate = () => {
+        const rect = heroSection.getBoundingClientRect();
+        computeTargets(rect);
+
+        for (let i = 0; i < spans.length; i++) {
+          const diff = targetOpacities[i] - currentOpacities[i];
+          if (Math.abs(diff) > 0.0005) currentOpacities[i] += diff * easing;
+          else currentOpacities[i] = targetOpacities[i];
+          spans[i].style.opacity = String(currentOpacities[i]);
+          if (targetOpacities[i] < 0.99) spans[i].classList.remove("blink");
+        }
+
+        rafId = requestAnimationFrame(animate);
+      };
+
+      const start = () => {
+        if (!rafId) rafId = requestAnimationFrame(animate);
+      };
+      const stop = () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+      };
+
+      // Pause when tab is hidden
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) stop();
+        else start();
+      });
+
+      // Re-init on resize
+      window.addEventListener("resize", () => {
+        currentOpacities = spans.map((s) => {
+          const v = parseFloat(getComputedStyle(s).opacity);
+          return Number.isFinite(v) ? v : 1;
+        });
+      });
+
+      // start loop right away
+      start();
+
+      // cleanup
+      window.addEventListener("beforeunload", stop);
+    }
+  }
+}
+

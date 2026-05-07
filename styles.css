@@ -210,6 +210,51 @@ h1 {
   overflow-wrap: break-word;
 }
 
+h1 .split,
+h1 .split_2 {
+  display: inline-block;
+}
+
+.split_2 {
+  transform-origin: center;
+  opacity: 1;
+.  will-change: opacity;
+}
+
+.split_2.blink {
+  animation: blink 2.4s ease-in-out forwards;
+}
+
+@keyframes blink {
+  0%, 10%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  20% {
+    opacity: 0.05;
+    filter: brightness(1.2);
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+    filter: brightness(1.1);
+  }
+  55% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .split_2,
+  .split_2.blink {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+  }
+}
+
 h2 {
   margin-bottom: 18px;
   font-size: clamp(2rem, 4vw, 4rem);
