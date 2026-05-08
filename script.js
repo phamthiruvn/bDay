@@ -226,7 +226,7 @@
     let animating = false;
     let showingTo = false;
 
-    const scrambleOnce = (start, end, duration = 500) => {
+    const scrambleOnce = (start, end, duration = 100) => {
       return new Promise((resolve) => {
         const startTime = performance.now();
         const startLen = start.length;
@@ -261,7 +261,7 @@
       if (animating || showingTo) return;
       animating = true;
       try {
-        await scrambleOnce(from, to, 500);
+        await scrambleOnce(from, to);
         showingTo = true;
       } catch (e) {}
       animating = false;
@@ -271,7 +271,7 @@
       if (animating || !showingTo) return;
       animating = true;
       try {
-        await scrambleOnce(to, from, 500);
+        await scrambleOnce(to, from);
         showingTo = false;
       } catch (e) {}
       animating = false;
