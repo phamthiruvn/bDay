@@ -224,8 +224,34 @@ if (heroSection) {
       // start loop right away
       start();
 
+      // Update immediately during scroll/touch on mobile to ensure responsiveness
+      let pendingScroll = false;
+      const onScrollOrTouch = () => {
+        if (pendingScroll) return;
+        pendingScroll = true;
+        requestAnimationFrame(() => {
+          const rect = heroSection.getBoundingClientRect();
+          computeTargets(rect);
+          for (let i = 0; i < spans.length; i++) {
+            currentOpacities[i] = targetOpacities[i];
+            spans[i].style.opacity = String(currentOpacities[i]);
+            if (targetOpacities[i] < 0.99) spans[i].classList.remove("blink");
+          }
+          pendingScroll = false;
+        });
+      };
+
+      window.addEventListener("scroll", onScrollOrTouch, { passive: true });
+      window.addEventListener("touchmove", onScrollOrTouch, { passive: true });
+      window.addEventListener("orientationchange", () => onScrollOrTouch());
+
       // cleanup
-      window.addEventListener("beforeunload", stop);
+      window.addEventListener("beforeunload", () => {
+        stop();
+        window.removeEventListener("scroll", onScrollOrTouch);
+        window.removeEventListener("touchmove", onScrollOrTouch);
+        window.removeEventListener("orientationchange", () => onScrollOrTouch());
+      });
     }
   }
 }
