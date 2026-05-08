@@ -210,15 +210,27 @@ h1 {
   overflow-wrap: break-word;
 }
 
+.hero-title {
+  max-width: 780px;
+  margin-bottom: 22px;
+  font-size: clamp(3.6rem, 8vw, 7.8rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: 0;
+  overflow-wrap: break-word;
+}
+
 h1 .split,
-h1 .split_2 {
+h1 .split_2,
+.hero-title .split,
+.hero-title .split_2 {
   display: inline-block;
 }
 
 .split_2 {
   transform-origin: center;
   opacity: 1;
-.  will-change: opacity;
+  will-change: opacity;
 }
 
 .split_2.blink {
