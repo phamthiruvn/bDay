@@ -289,4 +289,74 @@
   initHeadingEffects();
   initTextScramble();
 
+  // App hover preview: floating open-graph style preview for app tiles
+  const initAppPreview = () => {
+    const showcase = document.querySelector('.app-showcase');
+    const tiles = Array.from(document.querySelectorAll('.app-tile'));
+    if (!showcase || !tiles.length) return;
+
+    const preview = document.createElement('div');
+    preview.className = 'app-preview';
+    preview.setAttribute('aria-hidden', 'true');
+    preview.innerHTML = `
+      <div class="preview-card browser-mock">
+        <div class="mock-topbar"><span></span><span></span><span></span></div>
+        <div class="mock-main">
+          <div class="mock-line wide"></div>
+          <div class="mock-grid"><i></i><i></i></div>
+        </div>
+        <div class="preview-meta">
+          <strong class="preview-title">Preview</strong>
+          <span class="preview-desc">Placeholder description</span>
+        </div>
+      </div>`;
+    showcase.appendChild(preview);
+
+    let activeTimer = null;
+
+    const showPreview = (tile, x, y) => {
+      const title = tile.querySelector('.app-label strong')?.textContent?.trim() || 'Preview';
+      const desc = tile.querySelector('.app-label span')?.textContent?.trim() || 'Short preview of the app or project.';
+      preview.querySelector('.preview-title').textContent = title;
+      preview.querySelector('.preview-desc').textContent = desc;
+
+      // Position preview: prefer to the right of tile, but clamp to viewport
+      const rect = showcase.getBoundingClientRect();
+      const px = Math.min(window.innerWidth - 24 - 340, Math.max(12, x - rect.left + 18));
+      const py = Math.max(12, y - rect.top - 8);
+      preview.style.left = px + 'px';
+      preview.style.top = py + 'px';
+      preview.classList.add('is-visible');
+      preview.setAttribute('aria-hidden', 'false');
+    };
+
+    const hidePreview = () => {
+      preview.classList.remove('is-visible');
+      preview.setAttribute('aria-hidden', 'true');
+    };
+
+    tiles.forEach((tile) => {
+      // pointerenter to prepare and show after tiny delay
+      tile.addEventListener('pointerenter', (ev) => {
+        if (activeTimer) clearTimeout(activeTimer);
+        activeTimer = setTimeout(() => showPreview(tile, ev.clientX, ev.clientY), 90);
+      });
+      tile.addEventListener('pointermove', (ev) => {
+        if (preview.classList.contains('is-visible')) showPreview(tile, ev.clientX, ev.clientY);
+      });
+      tile.addEventListener('pointerleave', () => { if (activeTimer) clearTimeout(activeTimer); hidePreview(); });
+
+      // keyboard focus support
+      tile.addEventListener('focus', (ev) => { showPreview(tile, tile.getBoundingClientRect().right, tile.getBoundingClientRect().top); }, true);
+      tile.addEventListener('blur', () => hidePreview(), true);
+    });
+
+    // hide on escape
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') hidePreview(); });
+    // hide when clicking outside
+    document.addEventListener('pointerdown', (e) => { if (!showcase.contains(e.target)) hidePreview(); });
+  };
+
+  initAppPreview();
+
 })();
