@@ -4,6 +4,26 @@
   const themeToggle = document.querySelector(".theme-toggle");
   const storedTheme = localStorage.getItem("portfolio-theme");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+
+  // Conditional heavy styles loader: only load on non-touch, fine-pointer, not reduced-motion
+  const shouldLoadHeavy = () => {
+    try {
+      return !isTouch && !reducedMotion && window.matchMedia('(pointer: fine)').matches;
+    } catch (e) {
+      return !isTouch && !reducedMotion;
+    }
+  };
+
+  const loadHeavyStyles = () => {
+    if (!shouldLoadHeavy()) return;
+    if (document.querySelector('link[href="heavy.css"]')) return;
+    const l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = 'heavy.css';
+    l.media = 'all';
+    document.head.appendChild(l);
+  };
 
   // Cached selectors
   const revealItems = Array.from(document.querySelectorAll("[data-reveal]"));
@@ -25,7 +45,7 @@
 
   // Ambient pointer (mouse) parallax
   const initPointer = () => {
-    if (reducedMotion) return;
+    if (reducedMotion || isTouch) return;
     window.addEventListener("pointermove", (event) => {
       root.style.setProperty("--mouse-x", `${event.clientX}px`);
       root.style.setProperty("--mouse-y", `${event.clientY}px`);
@@ -71,7 +91,7 @@
 
   // Hero panel tilt
   const initHeroPanel = () => {
-    if (!heroPanel || reducedMotion) return;
+    if (!heroPanel || reducedMotion || isTouch) return;
     const onMove = (event) => {
       const rect = heroPanel.getBoundingClientRect();
       const x = (event.clientX - rect.left) / rect.width - 0.5;
@@ -280,6 +300,7 @@
 
   // Init all
   initTheme();
+  loadHeavyStyles();
   initPointer();
   initReveal();
   initCount();
@@ -313,6 +334,7 @@
     showcase.appendChild(preview);
 
     let activeTimer = null;
+    preview._currentTile = null;
 
     const showPreview = (tile, x, y) => {
       const title = tile.querySelector('.app-label strong')?.textContent?.trim() || 'Preview';
@@ -328,13 +350,35 @@
       preview.style.top = py + 'px';
       preview.classList.add('is-visible');
       preview.setAttribute('aria-hidden', 'false');
+      preview._currentTile = tile;
     };
 
     const hidePreview = () => {
       preview.classList.remove('is-visible');
       preview.setAttribute('aria-hidden', 'true');
+      preview._currentTile = null;
     };
+    if (isTouch) {
+      // Tap to open / toggle preview on touch devices
+      tiles.forEach((tile) => {
+        tile.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const rect = tile.getBoundingClientRect();
+          if (preview.classList.contains('is-visible') && preview._currentTile === tile) {
+            hidePreview();
+          } else {
+            showPreview(tile, rect.right, rect.top + rect.height / 2);
+          }
+        });
+      });
 
+      // hide when clicking outside
+      document.addEventListener('pointerdown', (e) => { if (!showcase.contains(e.target)) hidePreview(); }, true);
+      return;
+    }
+
+    // Non-touch: hover + keyboard support
     tiles.forEach((tile) => {
       // pointerenter to prepare and show after tiny delay
       tile.addEventListener('pointerenter', (ev) => {

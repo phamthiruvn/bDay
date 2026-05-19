@@ -42,14 +42,8 @@ html {
 
 body {
   margin: 0;
-  background:
-    radial-gradient(
-      circle at top left,
-      rgba(233, 79, 55, 0.12),
-      transparent 28rem
-    ),
-    linear-gradient(135deg, rgba(17, 122, 101, 0.07), transparent 34rem),
-    var(--bg);
+  /* lightweight background for mobile; heavy visuals are loaded separately */
+  background: var(--bg);
   color: var(--text);
   font-family:
     Inter,
@@ -61,34 +55,9 @@ body {
   line-height: 1.5;
 }
 
-body::before {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  content: "";
-  background-image:
-    linear-gradient(rgba(25, 24, 22, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(25, 24, 22, 0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: linear-gradient(to bottom, black, transparent 70%);
-}
+/* heavy decorative grid/background moved to heavy.css */
 
-.ambient-light {
-  position: fixed;
-  left: var(--mouse-x, 50%);
-  top: var(--mouse-y, 20%);
-  z-index: -1;
-  width: 360px;
-  height: 360px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(47, 91, 234, 0.18), transparent 68%);
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  transition:
-    left 160ms ease,
-    top 160ms ease;
-}
+/* ambient light effect moved to heavy.css */
 
 a {
   color: inherit;
@@ -116,7 +85,7 @@ textarea {
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface) 82%, transparent);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(18px);
+  /* reduced shadow on mobile; heavy shadow + blur is moved to heavy.css */
 }
 
 .brand,
@@ -348,8 +317,8 @@ h3 {
 .contact-form {
   border: 1px solid var(--line);
   background: color-mix(in srgb, var(--surface) 88%, transparent);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(16px);
+  /* lightweight shadow for mobile; heavy shadow + blur moved to heavy.css */
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
 
 .hero-panel {
@@ -543,8 +512,8 @@ h3 {
   z-index: 1;
   border: 1px solid rgba(255, 255, 255, 0.32);
   background: rgba(255, 255, 255, 0.22);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(16px);
+  /* lighter shadow on mobile; heavy shadow + blur moved to heavy.css */
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
 
 .browser-mock {
@@ -1094,42 +1063,7 @@ h3 {
   transform: translateY(0);
 }
 
-@keyframes pulse {
-  70% {
-    box-shadow: 0 0 0 12px rgba(17, 122, 101, 0);
-  }
-}
-
-@keyframes marquee {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes drift {
-  to {
-    transform: translate3d(-24px, -18px, 0) scale(1.08);
-  }
-}
-
-@keyframes float {
-  50% {
-    transform: translateY(-10px) rotate(-1deg);
-  }
-}
-
-@keyframes breathe {
-  to {
-    transform: scaleY(0.72);
-    opacity: 0.7;
-  }
-}
-
-@keyframes grow {
-  to {
-    transform: scaleY(0.74);
-  }
-}
+/* Heavy animation keyframes moved to heavy.css */
 
 @media (max-width: 1040px) {
   .section,
