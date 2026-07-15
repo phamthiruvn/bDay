@@ -74,14 +74,25 @@
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape") closeNavigation();
     });
-    window.matchMedia("(min-width: 821px)").addEventListener("change", (event) => {
+    const desktopQuery = window.matchMedia("(min-width: 821px)");
+    const handleDesktopChange = (event) => {
       if (event.matches) closeNavigation();
-    });
+    };
+    if (typeof desktopQuery.addEventListener === "function") {
+      desktopQuery.addEventListener("change", handleDesktopChange);
+    } else if (typeof desktopQuery.addListener === "function") {
+      // Safari versions before 14.1 use the legacy MediaQueryList API.
+      desktopQuery.addListener(handleDesktopChange);
+    }
   };
 
   // Reveal observer
   const initReveal = () => {
     if (!revealItems.length) return;
+    if (typeof IntersectionObserver !== "function") {
+      revealItems.forEach((el) => el.classList.add("is-visible"));
+      return;
+    }
     const observer = new IntersectionObserver((entries, obs) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
