@@ -44,13 +44,7 @@
   };
 
   // Ambient pointer (mouse) parallax
-  const initPointer = () => {
-    if (reducedMotion || isTouch) return;
-    window.addEventListener("pointermove", (event) => {
-      root.style.setProperty("--mouse-x", `${event.clientX}px`);
-      root.style.setProperty("--mouse-y", `${event.clientY}px`);
-    }, { passive: true });
-  };
+  // Ambient pointer (mouse) parallax removed per user request
 
   // Reveal observer
   const initReveal = () => {
@@ -92,15 +86,31 @@
   // Hero panel tilt
   const initHeroPanel = () => {
     if (!heroPanel || reducedMotion || isTouch) return;
-    const onMove = (event) => {
+    let lastPointerEvent = null;
+
+    const updateTransform = (event) => {
       const rect = heroPanel.getBoundingClientRect();
       const x = (event.clientX - rect.left) / rect.width - 0.5;
       const y = (event.clientY - rect.top) / rect.height - 0.5;
       heroPanel.style.transform = `rotateX(${y * -8}deg) rotateY(${x * 10}deg)`;
     };
+
+    const onMove = (event) => {
+      lastPointerEvent = event;
+      updateTransform(event);
+    };
+
+    const onResize = () => {
+      if (lastPointerEvent) {
+        updateTransform(lastPointerEvent);
+      } else {
+        heroPanel.style.transform = "";
+      }
+    };
+
     heroPanel.addEventListener("pointermove", onMove, { passive: true });
-    heroPanel.addEventListener("pointerleave", () => { heroPanel.style.transform = ""; });
-    window.addEventListener("resize", () => { heroPanel.style.transform = ""; });
+    heroPanel.addEventListener("pointerleave", () => { heroPanel.style.transform = ""; lastPointerEvent = null; });
+    window.addEventListener("resize", onResize);
   };
 
   // Filters and project card interactions
@@ -298,10 +308,32 @@
     });
   };
 
+  const initHeroCarousel = () => {
+    const carousel = document.querySelector('.hero-carousel');
+    if (!carousel) return;
+
+    const slides = Array.from(carousel.querySelectorAll('.carousel-slide'));
+    const dots = Array.from(carousel.querySelectorAll('.carousel-dot'));
+    const prevButton = carousel.querySelector('.carousel-arrow.prev');
+    const nextButton = carousel.querySelector('.carousel-arrow.next');
+    let currentIndex = 0;
+
+    const setSlide = (index) => {
+      currentIndex = (index + slides.length) % slides.length;
+      slides.forEach((slide, i) => slide.classList.toggle('is-active', i === currentIndex));
+      dots.forEach((dot, i) => dot.classList.toggle('is-active', i === currentIndex));
+    };
+
+    prevButton?.addEventListener('click', () => setSlide(currentIndex - 1));
+    nextButton?.addEventListener('click', () => setSlide(currentIndex + 1));
+    dots.forEach((dot, index) => dot.addEventListener('click', () => setSlide(index)));
+
+    setSlide(0);
+  };
+
   // Init all
   initTheme();
   loadHeavyStyles();
-  initPointer();
   initReveal();
   initCount();
   initHeroPanel();
@@ -309,6 +341,7 @@
   initContactForm();
   initHeadingEffects();
   initTextScramble();
+  initHeroCarousel();
 
   // App hover preview: floating open-graph style preview for app tiles
   const initAppPreview = () => {
