@@ -2,7 +2,11 @@
 (() => {
   const root = document.documentElement;
   const themeToggle = document.querySelector(".theme-toggle");
-  const storedTheme = localStorage.getItem("portfolio-theme");
+  const navToggle = document.querySelector(".nav-toggle");
+  const navLinks = document.querySelector(".nav-links");
+  const storedTheme = (() => {
+    try { return localStorage.getItem("portfolio-theme"); } catch { return null; }
+  })();
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
 
@@ -27,7 +31,6 @@
 
   // Cached selectors
   const revealItems = Array.from(document.querySelectorAll("[data-reveal]"));
-  const countTarget = document.querySelector("[data-count]");
   const heroPanel = document.querySelector(".hero-panel");
   const heroSection = document.querySelector(".hero");
   const filterButtons = Array.from(document.querySelectorAll("[data-filter]"));
@@ -37,14 +40,44 @@
   // Theme
   const initTheme = () => {
     if (storedTheme === "dark") root.classList.add("dark");
+    const syncThemeControl = () => {
+      const isDark = root.classList.contains("dark");
+      themeToggle?.setAttribute("aria-pressed", String(isDark));
+      themeToggle?.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
+      const icon = themeToggle?.querySelector(".toggle-icon");
+      if (icon) icon.textContent = isDark ? "☀" : "☾";
+    };
+    syncThemeControl();
     themeToggle?.addEventListener("click", () => {
       root.classList.toggle("dark");
-      localStorage.setItem("portfolio-theme", root.classList.contains("dark") ? "dark" : "light");
+      try { localStorage.setItem("portfolio-theme", root.classList.contains("dark") ? "dark" : "light"); } catch { /* storage unavailable */ }
+      syncThemeControl();
     });
   };
 
-  // Ambient pointer (mouse) parallax
-  // Ambient pointer (mouse) parallax removed per user request
+  const initMobileNavigation = () => {
+    if (!navToggle || !navLinks) return;
+    const closeNavigation = () => {
+      navLinks.classList.remove("is-open");
+      navToggle.setAttribute("aria-expanded", "false");
+      navToggle.setAttribute("aria-label", "Open navigation");
+    };
+
+    navToggle.addEventListener("click", () => {
+      const isOpen = navLinks.classList.toggle("is-open");
+      navToggle.setAttribute("aria-expanded", String(isOpen));
+      navToggle.setAttribute("aria-label", isOpen ? "Close navigation" : "Open navigation");
+    });
+    navLinks.addEventListener("click", (event) => {
+      if (event.target.closest("a")) closeNavigation();
+    });
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeNavigation();
+    });
+    window.matchMedia("(min-width: 821px)").addEventListener("change", (event) => {
+      if (event.matches) closeNavigation();
+    });
+  };
 
   // Reveal observer
   const initReveal = () => {
@@ -60,33 +93,11 @@
     revealItems.forEach((el) => observer.observe(el));
   };
 
-  // Count animation
-  const initCount = () => {
-    if (!countTarget) return;
-    let started = false;
-    const observer = new IntersectionObserver((entries, obs) => {
-      const entry = entries[0];
-      if (!entry?.isIntersecting || started) return;
-      started = true;
-      const target = Number(countTarget.dataset.count) || 0;
-      const start = performance.now();
-      const duration = 1100;
-      const tick = (now) => {
-        const progress = Math.min((now - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        countTarget.textContent = Math.round(target * eased).toString();
-        if (progress < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-      obs.disconnect();
-    }, { threshold: 0.5 });
-    observer.observe(countTarget);
-  };
-
   // Hero panel tilt
   const initHeroPanel = () => {
     if (!heroPanel || reducedMotion || isTouch) return;
     let lastPointerEvent = null;
+    let frame = 0;
 
     const updateTransform = (event) => {
       const rect = heroPanel.getBoundingClientRect();
@@ -97,7 +108,10 @@
 
     const onMove = (event) => {
       lastPointerEvent = event;
-      updateTransform(event);
+      if (!frame) frame = requestAnimationFrame(() => {
+        updateTransform(lastPointerEvent);
+        frame = 0;
+      });
     };
 
     const onResize = () => {
@@ -109,7 +123,12 @@
     };
 
     heroPanel.addEventListener("pointermove", onMove, { passive: true });
-    heroPanel.addEventListener("pointerleave", () => { heroPanel.style.transform = ""; lastPointerEvent = null; });
+    heroPanel.addEventListener("pointerleave", () => {
+      heroPanel.style.transform = "";
+      lastPointerEvent = null;
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+    });
     window.addEventListener("resize", onResize);
   };
 
@@ -151,100 +170,84 @@
   // Blink + fade animation for heading parts
   const initHeadingEffects = () => {
     const spans = Array.from(document.querySelectorAll(".hero-title .split_2"));
-    if (!spans.length) return;
+    if (!spans.length || !heroSection) return;
+
+    let lastBlinkAt = 0;
+    const minBlinkInterval = 1200;
 
     const triggerBlink = () => {
       if (reducedMotion) return;
+      const now = performance.now();
+      if (now - lastBlinkAt < minBlinkInterval) return;
+      lastBlinkAt = now;
       spans.forEach((span, i) => { span.classList.remove("blink"); span.style.animationDelay = `${i * 0.18}s`; });
       void document.body.offsetWidth;
       spans.forEach((s) => s.classList.add("blink"));
     };
 
-    // Per-frame interpolation for opacity; pause when hidden
+    // Opacity follows the current scroll position.
     if (reducedMotion) {
       spans.forEach((s) => (s.style.opacity = "1"));
-      return { triggerBlink };
+      return;
     }
 
-    let raf = null;
-    let current = spans.map((s) => parseFloat(getComputedStyle(s).opacity) || 1);
-    let target = current.slice();
-    const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) || window.innerWidth <= 768;
-    const easing = isMobile ? 0.3 : 0.1; // faster interpolation on mobile
-    const maxDistanceFactor = isMobile ? 0.3 : 0.45; // smaller distance -> quicker transparency on mobile
-
-    const computeTarget = (rect) => {
+    const updateOpacity = (rect) => {
+      const isMobile = window.matchMedia("(max-width: 768px)").matches;
+      const maxDistanceFactor = isMobile ? 0.3 : 0.45;
       const heroCenter = rect.top + rect.height / 2;
       const viewportCenter = window.innerHeight / 2;
       const distance = Math.abs(heroCenter - viewportCenter);
       const maxDistance = window.innerHeight * maxDistanceFactor;
-      const raw = 1 - distance / maxDistance;
-      const normalized = Math.max(0, Math.min(1, raw));
-      const minOpacity = 0;
-      const val = minOpacity + normalized * (1 - minOpacity);
-      // If hero fully scrolled past (above) or completely below viewport, snap to min immediately
-      if (rect.bottom <= 0 || rect.top >= window.innerHeight) {
-        for (let i = 0; i < target.length; i++) {
-          target[i] = minOpacity;
-          current[i] = minOpacity;
-          spans[i].style.opacity = String(minOpacity);
-          spans[i].classList.remove("blink");
-        }
-        return;
-      }
+      const opacity = rect.bottom <= 0 || rect.top >= window.innerHeight
+        ? 0
+        : Math.max(0, Math.min(1, 1 - distance / maxDistance));
 
-      for (let i = 0; i < target.length; i++) target[i] = val;
-      if (rect.top < window.innerHeight && rect.bottom > 0) {
-        if (!heroSection.dataset.blinkTriggered) { triggerBlink(); heroSection.dataset.blinkTriggered = "true"; }
-      } else heroSection.dataset.blinkTriggered = "false";
+      spans.forEach((span) => {
+        span.style.opacity = String(opacity);
+        if (opacity < 0.99) span.classList.remove("blink");
+      });
+
+      return opacity > 0;
     };
 
-    const step = () => {
-      const rect = heroSection.getBoundingClientRect();
-      computeTarget(rect);
-      for (let i = 0; i < spans.length; i++) {
-        const diff = target[i] - current[i];
-        if (Math.abs(diff) > 0.0005) current[i] += diff * easing;
-        else current[i] = target[i];
-        spans[i].style.opacity = String(current[i]);
-        if (target[i] < 0.99) spans[i].classList.remove("blink");
-      }
-      raf = requestAnimationFrame(step);
+    // Blink only after an intentional user scroll, never on page restoration or resize.
+    let scrollIntentUntil = 0;
+    let heroWasVisible = false;
+    const markScrollIntent = () => {
+      scrollIntentUntil = performance.now() + 250;
     };
+    window.addEventListener("wheel", markScrollIntent, { passive: true });
+    window.addEventListener("touchmove", markScrollIntent, { passive: true });
+    window.addEventListener("keydown", (event) => {
+      if ([" ", "ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End"].includes(event.key)) {
+        markScrollIntent();
+      }
+    });
 
-    // start
-    raf = requestAnimationFrame(step);
-
-    // mobile: immediate updates on scroll/touch for responsiveness
+    // Update only on scroll to avoid an always-running animation loop.
     let pending = false;
     const onScroll = () => {
       if (pending) return;
       pending = true;
       requestAnimationFrame(() => {
         const rect = heroSection.getBoundingClientRect();
-        computeTarget(rect);
-        for (let i = 0; i < spans.length; i++) { current[i] = target[i]; spans[i].style.opacity = String(current[i]); if (target[i] < 0.99) spans[i].classList.remove("blink"); }
+        const heroIsVisible = updateOpacity(rect);
+        if (heroIsVisible && !heroWasVisible && performance.now() < scrollIntentUntil) {
+          triggerBlink();
+        }
+        heroWasVisible = heroIsVisible;
         pending = false;
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("touchmove", onScroll, { passive: true });
-    window.addEventListener("orientationchange", onScroll);
-
-    // lifecycle
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) cancelAnimationFrame(raf);
-      else raf = requestAnimationFrame(step);
-    });
-
-    window.addEventListener("beforeunload", () => { cancelAnimationFrame(raf); window.removeEventListener("scroll", onScroll); window.removeEventListener("touchmove", onScroll); window.removeEventListener("orientationchange", onScroll); });
-
-    return { triggerBlink };
   };
-  const heroTittle = document.querySelector('.hero-title');
+
+
+  const heroTitle = document.querySelector('.hero-title');
   // Text scramble for specific heading span (show on hover only)
   const initTextScramble = () => {
     if (reducedMotion) return;
+    if (!heroTitle) return;
     const candidates = Array.from(document.querySelectorAll('.hero-title .split_2'));
     if (!candidates.length) return;
     const targetSpan = candidates.find(s => s.textContent.trim() === 'SPOKE');
@@ -287,7 +290,7 @@
     };
 
     // reveal on enter, revert on leave
-    heroTittle.addEventListener('pointerenter', async () => {
+    heroTitle.addEventListener('pointerenter', async () => {
       if (animating || showingTo) return;
       animating = true;
       try {
@@ -297,7 +300,7 @@
       animating = false;
     });
 
-    heroTittle.addEventListener('pointerleave', async () => {
+    heroTitle.addEventListener('pointerleave', async () => {
       if (animating || !showingTo) return;
       animating = true;
       try {
@@ -308,40 +311,16 @@
     });
   };
 
-  const initHeroCarousel = () => {
-    const carousel = document.querySelector('.hero-carousel');
-    if (!carousel) return;
-
-    const slides = Array.from(carousel.querySelectorAll('.carousel-slide'));
-    const dots = Array.from(carousel.querySelectorAll('.carousel-dot'));
-    const prevButton = carousel.querySelector('.carousel-arrow.prev');
-    const nextButton = carousel.querySelector('.carousel-arrow.next');
-    let currentIndex = 0;
-
-    const setSlide = (index) => {
-      currentIndex = (index + slides.length) % slides.length;
-      slides.forEach((slide, i) => slide.classList.toggle('is-active', i === currentIndex));
-      dots.forEach((dot, i) => dot.classList.toggle('is-active', i === currentIndex));
-    };
-
-    prevButton?.addEventListener('click', () => setSlide(currentIndex - 1));
-    nextButton?.addEventListener('click', () => setSlide(currentIndex + 1));
-    dots.forEach((dot, index) => dot.addEventListener('click', () => setSlide(index)));
-
-    setSlide(0);
-  };
-
   // Init all
   initTheme();
+  initMobileNavigation();
   loadHeavyStyles();
   initReveal();
-  initCount();
   initHeroPanel();
   initFilters();
   initContactForm();
   initHeadingEffects();
   initTextScramble();
-  initHeroCarousel();
 
   // App hover preview: floating open-graph style preview for app tiles
   const initAppPreview = () => {
@@ -377,8 +356,12 @@
 
       // Position preview: prefer to the right of tile, but clamp to viewport
       const rect = showcase.getBoundingClientRect();
-      const px = Math.min(window.innerWidth - 24 - 340, Math.max(12, x - rect.left + 18));
-      const py = Math.max(12, y - rect.top - 8);
+      const previewCard = preview.querySelector('.preview-card');
+      const previewBounds = previewCard.getBoundingClientRect();
+      const maxX = Math.max(12, window.innerWidth - previewBounds.width - 12);
+      const maxY = Math.max(12, window.innerHeight - previewBounds.height - 12);
+      const px = Math.min(maxX, Math.max(12, x - rect.left + 18));
+      const py = Math.min(maxY, Math.max(12, y - rect.top - 8));
       preview.style.left = px + 'px';
       preview.style.top = py + 'px';
       preview.classList.add('is-visible');

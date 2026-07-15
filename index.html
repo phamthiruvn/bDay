@@ -4,8 +4,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Placeholder page description." />
-  <title>Placeholder Page</title>
+  <meta name="description" content="Vietnam-based bespoke concept designer portfolio." />
+  <meta name="theme-color" content="#f7f5ef" />
+  <title>Vietnam Bespoke Concept Designer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -14,18 +15,23 @@
 
 <body>
   <header class="site-header" data-reveal>
-    <a class="brand" href="#home" aria-label="Placeholder home">
+    <a class="brand" href="#home" aria-label="Back to home">
       <span class="brand-mark">P</span>
-      <span>Placeholder</span>
+      <span>Vietnam Bespoke</span>
     </a>
-    <nav class="nav-links" aria-label="Primary navigation">
-      <a href="#work">Section</a>
-      <a href="#skills">Section</a>
-      <a href="#about">Section</a>
-      <a href="#contact">Section</a>
+    <nav class="nav-links" id="primary-navigation" aria-label="Primary navigation">
+      <a href="#work">Work</a>
+      <a href="#skills">Skills</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
     </nav>
-    <button class="theme-toggle" type="button" aria-label="Toggle theme">
-      <span class="toggle-icon" aria-hidden="true">T</span>
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="primary-navigation">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
+    <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false">
+      <span class="toggle-icon" aria-hidden="true">☾</span>
     </button>
   </header>
 
@@ -33,12 +39,12 @@
     <section class="hero section-grid">
       <div class="hero-copy" data-reveal>
         <p class="eyebrow">Placeholder label</p>
-        <div class="hero-title" role="heading" aria-level="1">
+        <h1 class="hero-title">
           <span class="split">VI</span><span class="split_2">ETNAM</span><br />
           <span class="split">BE</span><span class="split_2">SPOKE</span><br />
           <span class="split">CO</span><span class="split_2">NCEPT</span><br />
           <span class="split">DE</span><span class="split_2">SIGNER</span>
-        </div>
+        </h1>
         <p class="hero-text">
           Placeholder supporting text for the hero section. Replace this copy
           with a short introduction, value statement, or product message.
@@ -50,16 +56,16 @@
       </div>
 
       <aside class="hero-panel" aria-label="Photo carousel" data-reveal>
-        <div class="photo-card primary card-back">
-          <img src="img/1.jpg" alt="Photo back" class="carousel-photo">
+        <div class="photo-card card-back">
+            <img src="img/1.jpg" alt="Bespoke design detail" class="carousel-photo" width="900" height="1200" decoding="async">
         </div>
 
-        <div class="photo-card primary card-middle">
-          <img src="img/1.jpg" alt="Photo middle" class="carousel-photo">
+        <div class="photo-card card-middle">
+            <img src="img/1.jpg" alt="Bespoke design detail" class="carousel-photo" width="900" height="1200" loading="lazy" decoding="async">
         </div>
 
-        <div class="photo-card primary card-front">
-          <img src="img/1.jpg" alt="Photo front" class="carousel-photo">
+        <div class="photo-card card-front">
+            <img src="img/1.jpg" alt="Bespoke design detail" class="carousel-photo" width="900" height="1200" loading="lazy" decoding="async">
         </div>
       </aside>
     </section>
@@ -99,7 +105,7 @@
       </div>
       <div class="app-showcase" data-reveal aria-label="Placeholder item list">
         <div class="app-grid">
-          <article class="project-card app-tile app-blue" tabindex="0" data-category="type-a">
+          <article class="project-card app-tile" tabindex="0" data-category="type-a">
             <div class="app-icon" aria-hidden="true">
               <span class="icon-placeholder"></span>
             </div>
@@ -108,7 +114,7 @@
               <span>Item A</span>
             </div>
           </article>
-          <article class="project-card app-tile app-red" tabindex="0" data-category="type-a">
+          <article class="project-card app-tile" tabindex="0" data-category="type-a">
             <div class="app-icon" aria-hidden="true">
               <span class="icon-placeholder"></span>
             </div>
@@ -117,7 +123,7 @@
               <span>Item B</span>
             </div>
           </article>
-          <article class="project-card app-tile app-green" tabindex="0" data-category="type-b">
+          <article class="project-card app-tile" tabindex="0" data-category="type-b">
             <div class="app-icon" aria-hidden="true">
               <span class="icon-placeholder"></span>
             </div>
@@ -126,7 +132,7 @@
               <span>Item C</span>
             </div>
           </article>
-          <article class="project-card app-tile app-yellow" tabindex="0" data-category="type-b">
+          <article class="project-card app-tile" tabindex="0" data-category="type-b">
             <div class="app-icon" aria-hidden="true">
               <span class="icon-placeholder"></span>
             </div>
