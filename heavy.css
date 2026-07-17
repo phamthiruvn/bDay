@@ -1,4 +1,8 @@
-/* Heavy visuals and animations loaded conditionally on capable devices */
+/**
+ * Heavy visuals and animations loaded conditionally on capable devices
+ *
+ * @format
+ */
 
 body {
   background:
@@ -23,7 +27,6 @@ body::before {
   background-size: 48px 48px;
   mask-image: linear-gradient(to bottom, black, transparent 70%);
 }
-
 
 /* Heavy shadows and backdrop blurs for capable devices */
 .site-header {

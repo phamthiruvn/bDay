@@ -228,7 +228,7 @@
 
   const renderAppShowcase = async () => {
     if (!appGrid) return;
-    const response = await fetch("apps.json?v=1", { cache: "no-store" });
+    const response = await fetch("apps.json", { cache: "no-store" });
     if (!response.ok)
       throw new Error(`Failed to load apps.json: ${response.status}`);
     const apps = await response.json();
