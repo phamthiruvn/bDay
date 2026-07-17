@@ -1,0 +1,98 @@
+[
+  {
+    "title": "SU-NET",
+    "tag": "AI Portfolio",
+    "category": "type-a",
+    "size": "large",
+    "logo": "SN",
+    "description": "Modern AI portfolio with motion-driven transitions and immersive project framing.",
+    "stack": "React • GSAP",
+    "previewUrl": "https://su-net.vercel.app/",
+    "previewImage": "img/2.jpg",
+    "accent": "#111111"
+  },
+  {
+    "title": "Atelier One",
+    "tag": "Brand Site",
+    "category": "type-a",
+    "size": "medium",
+    "logo": "AO",
+    "description": "Editorial brand presentation with restrained color and image-first composition.",
+    "stack": "Webflow • Motion",
+    "previewUrl": "https://su-net.vercel.app/",
+    "previewImage": "img/2.jpg",
+    "accent": "#7a4632"
+  },
+  {
+    "title": "Muse Grid",
+    "tag": "Showcase",
+    "category": "type-b",
+    "size": "small",
+    "logo": "MG",
+    "description": "Gallery layout focused on fast scanning, rich previews, and collection browsing.",
+    "stack": "React • CSS",
+    "previewUrl": "https://su-net.vercel.app/",
+    "previewImage": "img/2.jpg",
+    "accent": "#214b8f"
+  },
+  {
+    "title": "Noir Room",
+    "tag": "Concept Page",
+    "category": "type-b",
+    "size": "large",
+    "logo": "NR",
+    "description": "Product concept with cinematic pacing, contrast-led hierarchy, and polished detail.",
+    "stack": "Next.js • Framer",
+    "previewUrl": "https://su-net.vercel.app/",
+    "previewImage": "img/1.jpg",
+    "accent": "#392d2b"
+  },
+  {
+    "title": "Form Lab",
+    "tag": "Experiment",
+    "category": "type-a",
+    "size": "small",
+    "logo": "FL",
+    "description": "Interactive lab for layout experiments, small motion studies, and UI systems.",
+    "stack": "Vite • JS",
+    "previewUrl": "https://su-net.vercel.app/",
+    "previewImage": "img/4.gif",
+    "accent": "#0b6b57"
+  },
+  {
+    "title": "Frame Deck",
+    "tag": "Presentation",
+    "category": "type-a",
+    "size": "medium",
+    "logo": "FD",
+    "description": "Case-study deck format for pitch narratives, timelines, and project highlights.",
+    "stack": "Slides • Design",
+    "previewUrl": "https://su-net.vercel.app/",
+    "previewImage": "img/3.jpg",
+    "accent": "#6e3d83"
+  },
+  {
+    "title": "Studio Map",
+    "tag": "Directory",
+    "category": "type-b",
+    "size": "small",
+    "logo": "SM",
+    "description": "Browsable studio directory designed for quick comparison and clear categorization.",
+    "stack": "Mapbox • UI",
+    "previewUrl": "https://su-net.vercel.app/",
+    "previewImage": "img/3.jpg",
+    "accent": "#5f5b31"
+  },
+  {
+    "title": "Motion Kit",
+    "tag": "Toolkit",
+    "category": "type-b",
+    "size": "medium",
+    "logo": "MK",
+    "description": "Compact motion system preview for reusable transitions and interaction patterns.",
+    "stack": "Lottie • CSS",
+    "previewUrl": "https://su-net.vercel.app/",
+    "previewImage": "img/1.jpg",
+    "accent": "#0f4f5f"
+  }
+]
