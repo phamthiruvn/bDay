@@ -165,7 +165,9 @@ textarea {
   margin: 3px auto;
   border-radius: 999px;
   background: currentColor;
-  transition: transform 180ms ease, opacity 180ms ease;
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease;
 }
 
 .section,
@@ -187,7 +189,8 @@ textarea {
 }
 
 .hero {
-  min-height: calc(100vh - 74px);
+    min-height: min(800px, calc(100dvh - 74px));
+
   align-items: center;
   padding: 68px 0 48px;
 }
@@ -368,8 +371,11 @@ h3 {
   overflow: hidden;
   background: color-mix(in srgb, var(--surface) 100%, transparent);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-  transform-origin:bottom center;
-  transition: transform 260ms ease, box-shadow 260ms ease, filter 260ms ease;
+  transform-origin: bottom center;
+  transition:
+    transform 260ms ease,
+    box-shadow 260ms ease,
+    filter 260ms ease;
   will-change: transform, box-shadow;
   cursor: pointer;
 }
@@ -804,7 +810,7 @@ h3 {
   font-weight: 700;
 }
 
-[data-reveal] {
+.js [data-reveal] {
   opacity: 0;
   transform: translateY(18px);
   transition:
@@ -812,7 +818,7 @@ h3 {
     transform 600ms ease;
 }
 
-[data-reveal].is-visible {
+.js [data-reveal].is-visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -964,7 +970,6 @@ h3 {
     height: 66px;
     border-radius: 19px;
   }
-
 }
 
 @media (max-width: 560px) {

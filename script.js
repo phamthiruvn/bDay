@@ -185,6 +185,7 @@
 
     let lastBlinkAt = 0;
     const minBlinkInterval = 1200;
+    const touchDevice = window.matchMedia("(hover: none), (pointer: coarse)").matches;
 
     const triggerBlink = () => {
       if (reducedMotion) return;
@@ -221,11 +222,11 @@
       return opacity > 0;
     };
 
-    // Blink only after an intentional user scroll, never on page restoration or resize.
+    // Desktop waits for intentional scroll; phones use the older scroll-driven blink.
     let scrollIntentUntil = 0;
     let heroWasVisible = false;
     const markScrollIntent = () => {
-      scrollIntentUntil = performance.now() + 250;
+      scrollIntentUntil = performance.now() + (touchDevice ? 1200 : 250);
     };
     window.addEventListener("wheel", markScrollIntent, { passive: true });
     window.addEventListener("touchmove", markScrollIntent, { passive: true });
@@ -243,7 +244,8 @@
       requestAnimationFrame(() => {
         const rect = heroSection.getBoundingClientRect();
         const heroIsVisible = updateOpacity(rect);
-        if (heroIsVisible && !heroWasVisible && performance.now() < scrollIntentUntil) {
+        const canBlink = touchDevice || (!heroWasVisible && performance.now() < scrollIntentUntil);
+        if (heroIsVisible && canBlink) {
           triggerBlink();
         }
         heroWasVisible = heroIsVisible;
@@ -322,16 +324,22 @@
     });
   };
 
-  // Init all
-  initTheme();
-  initMobileNavigation();
-  loadHeavyStyles();
-  initReveal();
-  initHeroPanel();
-  initFilters();
-  initContactForm();
-  initHeadingEffects();
-  initTextScramble();
+  // Init all. Reveal effects are optional; never let them blank the page.
+  root.classList.add("js");
+  try {
+    initTheme();
+    initMobileNavigation();
+    loadHeavyStyles();
+    initReveal();
+    initHeroPanel();
+    initFilters();
+    initContactForm();
+    initHeadingEffects();
+    initTextScramble();
+  } catch (error) {
+    root.classList.remove("js");
+    console.error("Optional page enhancement failed:", error);
+  }
 
   // App hover preview: floating open-graph style preview for app tiles
   const initAppPreview = () => {
