@@ -1,0 +1,57 @@
+/**
+ * Heavy visuals and animations loaded conditionally on capable devices
+ *
+ * @format
+ */
+
+body {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(233, 79, 55, 0.12),
+      transparent 28rem
+    ),
+    linear-gradient(135deg, rgba(17, 122, 101, 0.07), transparent 34rem),
+    var(--bg);
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  content: "";
+  background-image:
+    linear-gradient(rgba(25, 24, 22, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(25, 24, 22, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, black, transparent 70%);
+}
+
+/* Heavy shadows and backdrop blurs for capable devices */
+.site-header {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(18px);
+}
+
+.about-card,
+.contact-form {
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+
+.browser-mock {
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(16px);
+}
+
+.app-preview .preview-card {
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(12px);
+}
+
+@keyframes float {
+  50% {
+    transform: translateY(-10px) rotate(-1deg);
+  }
+}
